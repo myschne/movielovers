@@ -30,14 +30,44 @@ def calculate_average_rating(imdb_rating, tmdb_rating):
     return (imdb_rating + tmdb_rating) / 2
 
 # Function to visualize data
+# Function to visualize data
 def visualize_data(df):
     # Check if the DataFrame is empty
     if df.empty:
         print("DataFrame is empty. Cannot visualize data.")
         return
 
-    # Create bar chart for average ratings
-    sns.barplot(x='Title', y='Average Rating', data=df)
+    # Check if 'Average Rating' column exists in the DataFrame
+    if 'Average Rating' not in df.columns:
+        print("No 'Average Rating' column found. Cannot visualize data.")
+        return
+
+# Function to visualize data
+def visualize_data(df):
+    # Check if the DataFrame is empty
+    if df.empty:
+        print("DataFrame is empty. Cannot visualize data.")
+        return
+
+    # Check if 'Title' column exists in the DataFrame
+    if 'Title' not in df.columns:
+        print("No 'Title' column found. Cannot visualize data.")
+        return
+
+    # Check if 'Average Rating' column exists in the DataFrame
+    if 'Average Rating' not in df.columns:
+        print("No 'Average Rating' column found. Cannot visualize data.")
+        return
+
+    # Check if there are non-empty and non-NaN values in 'Average Rating' column
+    valid_ratings = df['Average Rating'].dropna()
+    if valid_ratings.empty:
+        print("No valid 'Average Rating' values found. Cannot visualize data.")
+        return
+
+    # Create bar chart for average ratings with a default color
+    plt.figure(figsize=(10, 6))  # Adjust figure size as needed
+    df.plot(kind='bar', x='Title', y='Average Rating', color='skyblue', legend=False)
     plt.title('Average Ratings of Movies')
     plt.show()
 
