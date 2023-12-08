@@ -3,11 +3,12 @@ import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import sqlite3 
 
 # Constants
 IMDB_API_KEY = "cbfa71b7"
 TMDB_API_KEY = "5d26fbe8ace3af695a9550c71fbd13c4"
-IMDB_BASE_URL = "ttp://www.omdbapi.com/?i=tt3896198&apikey=cbfa71b7"
+IMDB_BASE_URL = "http://www.omdbapi.com/?i=tt3896198&apikey=cbfa71b7"
 TMDB_BASE_URL = "https://api.themoviedb.org/3/"
 
 # Function to fetch data from IMDb API
@@ -30,6 +31,11 @@ def calculate_average_rating(imdb_rating, tmdb_rating):
 
 # Function to visualize data
 def visualize_data(df):
+    # Check if the DataFrame is empty
+    if df.empty:
+        print("DataFrame is empty. Cannot visualize data.")
+        return
+
     # Create bar chart for average ratings
     sns.barplot(x='Title', y='Average Rating', data=df)
     plt.title('Average Ratings of Movies')
@@ -42,9 +48,13 @@ def visualize_data(df):
 
     # Create pie chart for genre distribution
     genre_counts = df['Genre'].value_counts()
-    genre_counts.plot.pie(autopct='%1.1f%%')
-    plt.title('Genre Distribution of Recommended Movies')
-    plt.show()
+    if not genre_counts.empty:
+        genre_counts.plot.pie(autopct='%1.1f%%')
+        plt.title('Genre Distribution of Recommended Movies')
+        plt.show()
+    else:
+        print("Genre data is empty. Cannot create pie chart.")
+
 
 # Main function
 def main():
@@ -60,9 +70,10 @@ def main():
 
     # Fetch data from TMDb
     tmdb_data = fetch_tmdb_data(movie_title)
-    tmdb_title = tmdb_data['results'][0]['original_title']
-    tmdb_cast = tmdb_data['results'][0]['cast']
-    tmdb_rating = tmdb_data['results'][0]['vote_average']
+    # Fix for potential missing results
+    tmdb_title = tmdb_data.get('results', [{}])[0].get('original_title', '')
+    tmdb_cast = tmdb_data.get('results', [{}])[0].get('cast', [])
+    tmdb_rating = tmdb_data.get('results', [{}])[0].get('vote_average', 0)
 
     # Calculate average rating
     avg_rating = calculate_average_rating(imdb_rating, tmdb_rating)
@@ -82,4 +93,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
