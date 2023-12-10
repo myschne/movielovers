@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import sqlite3 
+import sys
+import imdb
 
 # Constants
 IMDB_API_KEY = "cbfa71b7"
@@ -88,6 +90,19 @@ def visualize_data(df):
 
 # Main function
 def main():
+    genre_list = ['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 
+                  'Documentary', 'Drama', 'Family', 'Fantasy', 'Film-Noir', 'History', 'Horror',
+                  'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Short', 'Sport', 'Thriller', 'War', 'Western' ]
+    
+    while True: 
+        genre = input("Enter a Genre From the List: " +  genre_list)
+        if genre in genre_list:
+            break
+        print("Genre Not Found")
+
+
+
+    
 
     # Example movie title
     movie_title = "Inception"
