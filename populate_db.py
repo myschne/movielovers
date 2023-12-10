@@ -8,12 +8,15 @@ import sqlite3
 # Constants
 IMDB_API_KEY = "cbfa71b7"
 TMDB_API_KEY = "5d26fbe8ace3af695a9550c71fbd13c4"
-IMDB_BASE_URL = "http://www.omdbapi.com/?i=tt3896198&apikey=cbfa71b7"
-TMDB_BASE_URL = "https://api.themoviedb.org/3/"
+IMDB_BASE_URL = "https://www.omdbapi.com/?i=tt3896198"
+TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/550"
+
 
 # Function to fetch data from IMDb API
 def fetch_imdb_data(title):
     params = {'apikey': IMDB_API_KEY, 't': title}
+    # params = {'t': title}
+    
     response = requests.get(IMDB_BASE_URL, params=params)
     data = response.json()
     return data
@@ -21,8 +24,9 @@ def fetch_imdb_data(title):
 # Function to fetch data from TMDb API
 def fetch_tmdb_data(title):
     params = {'api_key': TMDB_API_KEY, 'query': title}
-    response = requests.get(TMDB_BASE_URL + 'search/movie', params=params)
+    response = requests.get(TMDB_BASE_URL, params=params)
     data = response.json()
+    print(data,"tmdb")
     return data
 
 # Function to calculate average rating
@@ -32,24 +36,12 @@ def calculate_average_rating(imdb_rating, tmdb_rating):
 # Function to visualize data
 # Function to visualize data
 def visualize_data(df):
+    print(df)
     # Check if the DataFrame is empty
     if df.empty:
         print("DataFrame is empty. Cannot visualize data.")
         return
-
-    # Check if 'Average Rating' column exists in the DataFrame
-    if 'Average Rating' not in df.columns:
-        print("No 'Average Rating' column found. Cannot visualize data.")
-        return
-
-# Function to visualize data
-def visualize_data(df):
-    # Check if the DataFrame is empty
-    if df.empty:
-        print("DataFrame is empty. Cannot visualize data.")
-        return
-
-    # Check if 'Title' column exists in the DataFrame
+    
     if 'Title' not in df.columns:
         print("No 'Title' column found. Cannot visualize data.")
         return
@@ -58,6 +50,8 @@ def visualize_data(df):
     if 'Average Rating' not in df.columns:
         print("No 'Average Rating' column found. Cannot visualize data.")
         return
+
+
 
     # Check if there are non-empty and non-NaN values in 'Average Rating' column
     valid_ratings = df['Average Rating'].dropna()
@@ -69,14 +63,20 @@ def visualize_data(df):
     plt.figure(figsize=(10, 6))  # Adjust figure size as needed
     df.plot(kind='bar', x='Title', y='Average Rating', color='skyblue', legend=False)
     plt.title('Average Ratings of Movies')
+    plt.xlabel('Title')
+    plt.ylabel('Average Rating')
     plt.show()
 
     # Create scatter plot for IMDb and TMDb ratings correlation
+    plt.figure(figsize=(10, 6))
     sns.scatterplot(x='IMDb Rating', y='TMDb Rating', data=df)
     plt.title('IMDb vs TMDb Ratings Correlation')
+    plt.xlabel('IMDb Rating')
+    plt.ylabel('TMDb Rating')
     plt.show()
 
     # Create pie chart for genre distribution
+    plt.figure(figsize=(10, 6))
     genre_counts = df['Genre'].value_counts()
     if not genre_counts.empty:
         genre_counts.plot.pie(autopct='%1.1f%%')
@@ -88,6 +88,7 @@ def visualize_data(df):
 
 # Main function
 def main():
+
     # Example movie title
     movie_title = "Inception"
 
@@ -100,10 +101,14 @@ def main():
 
     # Fetch data from TMDb
     tmdb_data = fetch_tmdb_data(movie_title)
+    
     # Fix for potential missing results
-    tmdb_title = tmdb_data.get('results', [{}])[0].get('original_title', '')
-    tmdb_cast = tmdb_data.get('results', [{}])[0].get('cast', [])
-    tmdb_rating = tmdb_data.get('results', [{}])[0].get('vote_average', 0)
+    tmdb_title = tmdb_data.get('original_title', '')
+    if not tmdb_title:
+        #TODO
+        x = 1
+    tmdb_cast = tmdb_data.get('cast', [])
+    tmdb_rating = tmdb_data.get('vote_average', 0)
 
     # Calculate average rating
     avg_rating = calculate_average_rating(imdb_rating, tmdb_rating)
