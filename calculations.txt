@@ -1,0 +1,7 @@
+Movie Title: Die Hard  Average Rating:  7.9895
+
+Action Average Rating:  7.144916666666667
+Animation Average Rating:  4.85
+Comedy Average Rating:  6.057166666666667
+Documentary Average Rating:  5.640000000000001
+Short Average Rating:  5.3
