@@ -10,7 +10,7 @@ import imdb
 # Constants
 IMDB_API_KEY = "cbfa71b7"
 TMDB_API_KEY = "5d26fbe8ace3af695a9550c71fbd13c4"
-IMDB_BASE_URL = "https://www.omdbapi.com/?i=tt3896198"
+IMDB_BASE_URL = f"https://www.omdbapi.com/API/AdvancedSearch/{IMDB_API_KEY}" 
 TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/550"
 
 
@@ -90,15 +90,50 @@ def visualize_data(df):
 
 # Main function
 def main():
+    
+    #Genre List
     genre_list = ['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 
                   'Documentary', 'Drama', 'Family', 'Fantasy', 'Film-Noir', 'History', 'Horror',
                   'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Short', 'Sport', 'Thriller', 'War', 'Western' ]
     
+    #Get User Input for Genre
     while True: 
         genre = input("Enter a Genre From the List: " +  genre_list)
         if genre in genre_list:
             break
         print("Genre Not Found")
+
+    #Get Data from API
+    ia = imdb.IMDb()
+    top250 = ia.get_top250_movies()
+    i = 0
+    top_10_action_scifi = []
+
+    con = sqlite3.connect('movie_data.db')
+    cur = con.cursor()
+    
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS imdb_info("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "title VARCHAR[64] NOT NULL,"
+            "year INTEGER NOT NULL,"
+            "rating REAL NOT NULL"
+        ")"
+    )
+
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS imdb_genres("
+            "id INTEGER PRIMARY KEY NOT NULL, "
+            "genre VARCHAR[64] NOT NULL,"
+        ")"
+    )
+
+    for movie in top250:
+        if i < 20 and genre in ia.get_movie(movie.movieID).data['genres']:
+            top_10_action_scifi.append(movie.movieID)
+            i = i + 1
+            print(movie)
+
 
 
 
