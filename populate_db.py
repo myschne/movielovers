@@ -7,12 +7,126 @@ import sqlite3
 import sys
 import imdb
 
+
 # Constants
 IMDB_API_KEY = "cbfa71b7"
 TMDB_API_KEY = "5d26fbe8ace3af695a9550c71fbd13c4"
-IMDB_BASE_URL = f"https://www.omdbapi.com/API/AdvancedSearch/{IMDB_API_KEY}" 
+IMDB_BASE_URL = "https://www.omdbapi.com/" 
 TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/550"
 
+#Genre Lists
+action_movies = [
+"Die Hard",
+"Mad Max: Fury Road",
+"The Dark Knight",
+"Terminator 2: Judgment Day",
+"John Wick",
+"Gladiator",
+"The Bourne Identity",
+"Mission: Impossible - Fallout",
+"Kill Bill: Volume 1",
+"Lethal Weapon",
+"The Matrix",
+"Rambo: First Blood",
+"The Raid: Redemption",
+"Predator",
+"Speed",
+"Atomic Blonde",
+"Taken",
+"Die Hard with a Vengeance",
+"Ip Man",
+"Black Panther"
+]
+comedy_movies = [
+"Anchorman: The Legend of Ron Burgundy",
+"Superbad",
+"The Hangover",
+"Bridesmaids",
+"Dumb and Dumber",
+"Ferris Bueller's Day Off",
+"The Grand Budapest Hotel",
+"Shaun of the Dead",
+"Airplane!",
+"The Princess Bride",
+"Ghostbusters",
+"Caddyshack",
+"Napoleon Dynamite",
+"Groundhog Day",
+"The 40-Year-Old Virgin",
+"Dodgeball: A True Underdog Story",
+"Zoolander",
+"Mean Girls",
+"Office Space",
+"Pineapple Express"
+]
+drama_movies = [
+"The Shawshank Redemption",
+"The Godfather",
+"Schindler's List",
+"Forrest Gump",
+"The Dark Knight",
+"Gladiator",
+"The Silence of the Lambs",
+"Schindler's List",
+"The Green Mile",
+"A Beautiful Mind",
+"The Pursuit of Happyness",
+"The Social Network",
+"The Revenant",
+"12 Years a Slave",
+"Atonement",
+"Good Will Hunting",
+"American Beauty",
+"The Pianist",
+"Casablanca",
+"The Shape of Water"
+]
+romance_movies = [
+"The Notebook",
+"Titanic",
+"Pride and Prejudice",
+"Eternal Sunshine of the Spotless Mind",
+"La La Land",
+"Before Sunrise",
+"The Fault in Our Stars",
+"500 Days of Summer",
+"Pretty Woman",
+"The Princess Bride",
+"Notting Hill",
+"Casablanca",
+"Romeo + Juliet",
+"Brokeback Mountain",
+"A Walk to Remember",
+"When Harry Met Sally",
+"Silver Linings Playbook",
+"The Shape of Water",
+"The Phantom of the Opera",
+"Sense and Sensibility"
+]
+sci_fi_movies = [
+"Blade Runner",
+"The Matrix",
+"Star Wars: Episode IV - A New Hope",
+"Interstellar",
+"2001: A Space Odyssey",
+"The Terminator",
+"E.T. the Extra-Terrestrial",
+"Inception",
+"The Fifth Element",
+"Jurassic Park",
+"The Day the Earth Stood Still",
+"The War of the Worlds",
+"Back to the Future",
+"Avatar",
+"The Martian",
+"The Matrix Reloaded",
+"Close Encounters of the Third Kind",
+"The Empire Strikes Back",
+"The Hitchhiker's Guide to the Galaxy",
+"Ex Machina"
+]
+genre_list = {'Action': action_movies, 'Comedy': comedy_movies, 'Drama': drama_movies, 'Romance': romance_movies, 'Sci-Fi': sci_fi_movies}
+    
 
 # Function to fetch data from IMDb API
 def fetch_imdb_data(title):
@@ -35,146 +149,109 @@ def fetch_tmdb_data(title):
 def calculate_average_rating(imdb_rating, tmdb_rating):
     return (imdb_rating + tmdb_rating) / 2
 
-# Function to visualize data
-# Function to visualize data
-def visualize_data(df):
-    print(df)
-    # Check if the DataFrame is empty
-    if df.empty:
-        print("DataFrame is empty. Cannot visualize data.")
-        return
-    
-    if 'Title' not in df.columns:
-        print("No 'Title' column found. Cannot visualize data.")
-        return
-
-    # Check if 'Average Rating' column exists in the DataFrame
-    if 'Average Rating' not in df.columns:
-        print("No 'Average Rating' column found. Cannot visualize data.")
-        return
 
 
+   
 
-    # Check if there are non-empty and non-NaN values in 'Average Rating' column
-    valid_ratings = df['Average Rating'].dropna()
-    if valid_ratings.empty:
-        print("No valid 'Average Rating' values found. Cannot visualize data.")
-        return
-
-    # Create bar chart for average ratings with a default color
-    plt.figure(figsize=(10, 6))  # Adjust figure size as needed
-    df.plot(kind='bar', x='Title', y='Average Rating', color='skyblue', legend=False)
-    plt.title('Average Ratings of Movies')
-    plt.xlabel('Title')
-    plt.ylabel('Average Rating')
-    plt.show()
-
-    # Create scatter plot for IMDb and TMDb ratings correlation
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='IMDb Rating', y='TMDb Rating', data=df)
-    plt.title('IMDb vs TMDb Ratings Correlation')
-    plt.xlabel('IMDb Rating')
-    plt.ylabel('TMDb Rating')
-    plt.show()
-
-    # Create pie chart for genre distribution
-    plt.figure(figsize=(10, 6))
-    genre_counts = df['Genre'].value_counts()
-    if not genre_counts.empty:
-        genre_counts.plot.pie(autopct='%1.1f%%')
-        plt.title('Genre Distribution of Recommended Movies')
-        plt.show()
-    else:
-        print("Genre data is empty. Cannot create pie chart.")
 
 
 # Main function
 def main():
     
-    #Genre List
-    genre_list = ['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 
-                  'Documentary', 'Drama', 'Family', 'Fantasy', 'Film-Noir', 'History', 'Horror',
-                  'Music', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Short', 'Sport', 'Thriller', 'War', 'Western' ]
-    
+
     #Get User Input for Genre
     while True: 
-        genre = input("Enter a Genre From the List: " +  genre_list)
+        print("Genre List: ", end = "")
+        print(genre_list.keys())
+        genre = input("Enter a Genre From the List: ")
         if genre in genre_list:
             break
         print("Genre Not Found")
+    
+
 
     #Get Data from API
-    ia = imdb.IMDb()
-    top250 = ia.get_top250_movies()
-    i = 0
-    top_10_action_scifi = []
 
     con = sqlite3.connect('movie_data.db')
     cur = con.cursor()
     
     cur.execute(
-        "CREATE TABLE IF NOT EXISTS imdb_info("
+        "CREATE TABLE IF NOT EXISTS imdb_info( "
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "title VARCHAR[64] NOT NULL,"
-            "year INTEGER NOT NULL,"
-            "rating REAL NOT NULL"
-        ")"
+            "title VARCHAR[64] NOT NULL, "
+            "year INTEGER NOT NULL, "
+            "rating REAL NOT NULL)"
     )
+    con.commit()
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS imdb_genres("
             "id INTEGER PRIMARY KEY NOT NULL, "
-            "genre VARCHAR[64] NOT NULL,"
-        ")"
+            "genre VARCHAR[64] NOT NULL)"
+    )
+    con.commit()
+    
+    i = 0
+
+    for movie in genre_list[genre]:
+        if i < 20:
+            movie = fetch_imdb_data(genre_list[genre][i])
+            title = movie['Title']
+            rating = movie['Ratings']['1']['Value']
+            year = movie['Year']
+            
+
+            cur.execute(
+                "INSERT INTO imdb_info(title, year, rating) "
+                "VALUES(?, ?, ?)",
+                (title, year, rating)
+            )
+
+            cur.execute(
+                "SELECT last_insert_rowid()"
+            )
+
+            id = cur.fetchone()['last_insert_rowid()']
+
+            cur.execute(
+                "INSERT INTO imdb_genres(id, genre) "
+                "VALUES(?,?)",
+                (id,genre)
+            )
+            i += 1
+            print(movie)
+    cur.execute(
+        "SELECT * FROM imdb_data "
     )
 
-    for movie in top250:
-        if i < 20 and genre in ia.get_movie(movie.movieID).data['genres']:
-            top_10_action_scifi.append(movie.movieID)
-            i = i + 1
-            print(movie)
 
+   
 
+    # # Fetch data from TMDb
+    # tmdb_data = fetch_tmdb_data(movie_title)
+    
+    # # Fix for potential missing results
+    # tmdb_title = tmdb_data.get('original_title', '')
+    # if not tmdb_title:
+    #     #TODO
+    #     x = 1
+    # tmdb_cast = tmdb_data.get('cast', [])
+    # tmdb_rating = tmdb_data.get('vote_average', 0)
 
+    # # Calculate average rating
+    # avg_rating = calculate_average_rating(imdb_rating, tmdb_rating)
+
+    # # Create DataFrame
+    # data = {'Title': [imdb_title],
+    #         'Year': [imdb_year],
+    #         'Genre': [imdb_genre],
+    #         'IMDb Rating': [imdb_rating],
+    #         'TMDb Rating': [tmdb_rating],
+    #         'Average Rating': [avg_rating]}
+
+    # df = pd.DataFrame(data)
 
     
-
-    # Example movie title
-    movie_title = "Inception"
-
-    # Fetch data from IMDb
-    imdb_data = fetch_imdb_data(movie_title)
-    imdb_title = imdb_data.get('Title')
-    imdb_year = imdb_data.get('Year')
-    imdb_genre = imdb_data.get('Genre')
-    imdb_rating = float(imdb_data.get('imdbRating', 0))
-
-    # Fetch data from TMDb
-    tmdb_data = fetch_tmdb_data(movie_title)
-    
-    # Fix for potential missing results
-    tmdb_title = tmdb_data.get('original_title', '')
-    if not tmdb_title:
-        #TODO
-        x = 1
-    tmdb_cast = tmdb_data.get('cast', [])
-    tmdb_rating = tmdb_data.get('vote_average', 0)
-
-    # Calculate average rating
-    avg_rating = calculate_average_rating(imdb_rating, tmdb_rating)
-
-    # Create DataFrame
-    data = {'Title': [imdb_title],
-            'Year': [imdb_year],
-            'Genre': [imdb_genre],
-            'IMDb Rating': [imdb_rating],
-            'TMDb Rating': [tmdb_rating],
-            'Average Rating': [avg_rating]}
-
-    df = pd.DataFrame(data)
-
-    # Visualize data
-    visualize_data(df)
 
 if __name__ == "__main__":
     main()
