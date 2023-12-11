@@ -5,14 +5,14 @@ import seaborn as sns
 import pandas as pd
 import sqlite3 
 import sys
-import imdb
+
 
 
 # Constants
 IMDB_API_KEY = "cbfa71b7"
 TMDB_API_KEY = "5d26fbe8ace3af695a9550c71fbd13c4"
 IMDB_BASE_URL = "https://www.omdbapi.com/" 
-TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/550"
+TMDB_BASE_URL = "https://api.themoviedb.org/3/movie/"
 
 #Genre Lists
 action_movies = [
@@ -125,7 +125,69 @@ sci_fi_movies = [
 "The Hitchhiker's Guide to the Galaxy",
 "Ex Machina"
 ]
-genre_list = {'Action': action_movies, 'Comedy': comedy_movies, 'Drama': drama_movies, 'Romance': romance_movies, 'Sci-Fi': sci_fi_movies}
+
+horror_movies = [
+    "The Exorcist",
+    "Psycho",
+    "Get Out",
+    "A Nightmare on Elm Street",
+    "The Shining",
+    "Halloween",
+    "The Babadook",
+    "The Conjuring",
+    "Hereditary",
+    "It Follows",
+    "The Witch",
+    "A Quiet Place",
+    "Don't Breathe",
+    "Paranormal Activity",
+    "The Blair Witch Project",
+    "Saw",
+    "Cabin in the Woods",
+    "The Sixth Sense",
+    "The Ring",
+    "Insidious"
+]
+war_movies = [
+    "Saving Private Ryan",
+    "Apocalypse Now",
+    "Full Metal Jacket",
+    "Dunkirk",
+    "Platoon",
+    "Hacksaw Ridge",
+    "Black Hawk Down",
+    "Letters from Iwo Jima",
+    "The Thin Red Line",
+    "1917"
+]
+documentary_movies = [
+    "An Inconvenient Truth",
+    "Man on Wire",
+    "March of the Penguins",
+    "Blackfish",
+    "Won't You Be My Neighbor?",
+    "Jiro Dreams of Sushi",
+    "Amy",
+    "The Act of Killing",
+    "Icarus",
+    "Free Solo"
+]
+thriller_movies = [
+    "Se7en",
+    "The Usual Suspects",
+    "Memento",
+    "Gone Girl",
+    "Prisoners",
+    "The Sixth Sense",
+    "Zodiac",
+    "Shutter Island",
+    "Oldboy",
+    "The Girl with the Dragon Tattoo"
+]
+
+genre_list = {'Action': action_movies, 'Comedy': comedy_movies, 'Drama': drama_movies, 
+              'Romance': romance_movies, 'Sci-Fi': sci_fi_movies, 'Horror': horror_movies,
+              'War': war_movies, 'Documentary':documentary_movies, 'Thriller': thriller_movies}
     
 
 # Function to fetch data from IMDb API
@@ -140,7 +202,7 @@ def fetch_imdb_data(title):
 # Function to fetch data from TMDb API
 def fetch_tmdb_data(title):
     params = {'api_key': TMDB_API_KEY, 'query': title}
-    response = requests.get(TMDB_BASE_URL, params=params)
+    response = requests.get(TMDB_BASE_URL + title, params=params)
     data = response.json()
     print(data,"tmdb")
     return data
@@ -168,10 +230,7 @@ def main():
             break
         print("Genre Not Found")
     
-
-
-    #Get Data from API
-
+    #Get Data from IMDB API
     con = sqlite3.connect('movie_data.db')
     cur = con.cursor()
     
@@ -180,14 +239,21 @@ def main():
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "title VARCHAR[64] NOT NULL, "
             "year INTEGER NOT NULL, "
-            "rating REAL NOT NULL)"
+            "imdb_rating REAL NOT NULL)"
     )
-    con.commit()
+
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS imdb_genres("
             "id INTEGER PRIMARY KEY NOT NULL, "
             "genre VARCHAR[64] NOT NULL)"
+    )
+
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS tmdb_info("
+            "id INTEGER PRIMARY KEY NOT NULL, "
+            "title VARCHAR[64] NOT NULL, "
+            "tmdb_rating REAL NOT NULL)"
     )
     con.commit()
     
@@ -196,62 +262,59 @@ def main():
     for movie in genre_list[genre]:
         if i < 20:
             movie = fetch_imdb_data(genre_list[genre][i])
+            if(movie["Response"] == "False"):
+                i +=1
+                break
             title = movie['Title']
-            rating = movie['Ratings']['1']['Value']
+            imdb_rating = movie['imdbRating']
             year = movie['Year']
             
 
             cur.execute(
-                "INSERT INTO imdb_info(title, year, rating) "
+                "INSERT INTO imdb_info(title, year, imdb_rating) "
                 "VALUES(?, ?, ?)",
-                (title, year, rating)
+                (title, year, float(imdb_rating))
             )
-
             cur.execute(
                 "SELECT last_insert_rowid()"
             )
 
-            id = cur.fetchone()['last_insert_rowid()']
+            id = cur.fetchone()
 
             cur.execute(
                 "INSERT INTO imdb_genres(id, genre) "
                 "VALUES(?,?)",
-                (id,genre)
+                (id[0],genre)
             )
             i += 1
             print(movie)
+
+            #Fetch Data from TMDB
+            
+            imdb_id = movie["imdbID"]
+            # tmdb_data = fetch_tmdb_data(genre_list[genre][i])
+            tmdb_data = fetch_tmdb_data(imdb_id)
+
+
+            tmdb_rating = -1
+            if("success" not in tmdb_data):
+                tmdb_rating = tmdb_data['vote_average']
+
+            cur.execute(
+                "INSERT INTO tmdb_info(id, title, tmdb_rating) "
+                "VALUES(?, ?, ?)",
+                (id[0],title, tmdb_rating)
+            )
+            
+            i += 1
+            print(movie)
+
     cur.execute(
-        "SELECT * FROM imdb_data "
+        "SELECT * FROM imdb_info "
     )
+    con.commit()
+    con.close()
 
-
-   
-
-    # # Fetch data from TMDb
-    # tmdb_data = fetch_tmdb_data(movie_title)
-    
-    # # Fix for potential missing results
-    # tmdb_title = tmdb_data.get('original_title', '')
-    # if not tmdb_title:
-    #     #TODO
-    #     x = 1
-    # tmdb_cast = tmdb_data.get('cast', [])
-    # tmdb_rating = tmdb_data.get('vote_average', 0)
-
-    # # Calculate average rating
-    # avg_rating = calculate_average_rating(imdb_rating, tmdb_rating)
-
-    # # Create DataFrame
-    # data = {'Title': [imdb_title],
-    #         'Year': [imdb_year],
-    #         'Genre': [imdb_genre],
-    #         'IMDb Rating': [imdb_rating],
-    #         'TMDb Rating': [tmdb_rating],
-    #         'Average Rating': [avg_rating]}
-
-    # df = pd.DataFrame(data)
-
-    
 
 if __name__ == "__main__":
     main()
