@@ -93,14 +93,15 @@ def main():
             if i < 25:
                 movie = fetch_imdb_data(movie['Title'])
                 if(movie["Response"] == "False"):
-                    break
+                    continue
                 title = movie['Title']
                 imdb_rating = movie['imdbRating']
                 year = movie['Year']
                 genre = movie['Genre'].split(',')[0]
                 if imdb_rating == 'N/A':
-                    break
-
+                    continue
+                if cur.execute('SELECT id FROM imdb_info WHERE title = ?',(title,)).fetchone() is not None:
+                    continue
                 cur.execute(
                     "INSERT INTO imdb_info(title, year, imdb_rating) "
                     "VALUES(?, ?, ?)",
