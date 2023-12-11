@@ -1,49 +1,86 @@
-import populate_db
+import requests
+import json
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import sqlite3 
+import sys
 
-def visualize_data(df):
-    print(df)
-    # Check if the DataFrame is empty
-    if df.empty:
-        print("DataFrame is empty. Cannot visualize data.")
-        return
-        
-    if 'Title' not in df.columns:
-        print("No 'Title' column found. Cannot visualize data.")
-        return
+def visualize_data(cur):
+    movie_ratings = []
+    for row in cur.execute("""
+        SELECT imdb_info.id, imdb_rating, tmdb_rating, imdb_info.title 
+        FROM imdb_info 
+        JOIN tmdb_info ON imdb_info.id = tmdb_info.id 
+        """):
+        movie_id, imdb_rating, tmdb_rating, title = row
+        if tmdb_rating is None:
+            tmdb_rating = imdb_rating
+        avg_movie_rating = (imdb_rating + tmdb_rating) / 2
+        movie_ratings.append((title, avg_movie_rating))
 
-    # Check if 'Average Rating' column exists in the DataFrame
-    if 'Average Rating' not in df.columns:
-        print("No 'Average Rating' column found. Cannot visualize data.")
-        return
+    # Sort the movie_ratings list by average rating in descending order
+    movie_ratings.sort(key=lambda x: x[1], reverse=True)
 
-    # Check if there are non-empty and non-NaN values in 'Average Rating' column
-    valid_ratings = df['Average Rating'].dropna()
-    if valid_ratings.empty:
-        print("No valid 'Average Rating' values found. Cannot visualize data.")
-        return
+    # Extract top movies and their ratings
+    top_movies = [movie for movie, _ in movie_ratings[:10]]
+    top_ratings = [rating for _, rating in movie_ratings[:10]]
 
-    # Create bar chart for average ratings with a default color
-    plt.figure(figsize=(10, 6))  # Adjust figure size as needed
-    df.plot(kind='bar', x='Title', y='Average Rating', color='skyblue', legend=False)
-    plt.title('Average Ratings of Movies')
-    plt.xlabel('Title')
+    # Plotting the bar chart
+    plt.bar(top_movies, top_ratings, color='skyblue')
+    plt.xlabel('Movies')
     plt.ylabel('Average Rating')
+    plt.title('Top Rated Movies Based on Average IMDb and TMDb Ratings')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
     plt.show()
 
     # Create scatter plot for IMDb and TMDb ratings correlation
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='IMDb Rating', y='TMDb Rating', data=df)
-    plt.title('IMDb vs TMDb Ratings Correlation')
+    imdb_ratings = []
+    tmdb_ratings = []
+
+    for row in cur.execute("""
+        SELECT imdb_rating, tmdb_rating 
+        FROM imdb_info 
+        JOIN tmdb_info ON imdb_info.id = tmdb_info.id 
+        WHERE imdb_rating IS NOT NULL AND tmdb_rating IS NOT NULL
+        """):
+        imdb_rating, tmdb_rating = row
+        imdb_ratings.append(imdb_rating)
+        tmdb_ratings.append(tmdb_rating)
+
+    # Plotting the scatter plot
+    plt.scatter(imdb_ratings, tmdb_ratings, color='blue', alpha=0.5)
     plt.xlabel('IMDb Rating')
     plt.ylabel('TMDb Rating')
+    plt.title('IMDb and TMDb Ratings Correlation')
+    plt.grid(True)
     plt.show()
 
+    
     # Create pie chart for genre distribution
-    plt.figure(figsize=(10, 6))
-    genre_counts = df['Genre'].value_counts()
-    if not genre_counts.empty:
-        genre_counts.plot.pie(autopct='%1.1f%%')
-        plt.title('Genre Distribution of Recommended Movies')
-        plt.show()
-    else:
-        print("Genre data is empty. Cannot create pie chart.")
+    genre_counts = {}
+
+    for row in cur.execute("""
+        SELECT genre 
+        FROM imdb_genres
+    """):
+        genre = row[0]
+        genre_counts[genre] = genre_counts.get(genre, 0) + 1
+
+    # Plotting the pie chart
+    labels = genre_counts.keys()
+    sizes = genre_counts.values()
+
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Equal aspect ratio ensures that the pie is drawn as a circle.
+    plt.title('Genre Distribution')
+    plt.show()
+
+
+def main():
+    con = sqlite3.connect('movie_data.db')
+    cur = con.cursor()
+    visualize_data(cur)
+if __name__ == "__main__":
+    main()
