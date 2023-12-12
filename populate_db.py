@@ -51,8 +51,8 @@ def main():
     cur.execute(
         "CREATE TABLE IF NOT EXISTS imdb_genres("
             "genre_id INTEGER PRIMARY KEY AUTOINCREMENT, "
-            "genre VARCHAR[64] NOT NULL,")
-                 
+            "genre VARCHAR[64] NOT NULL)"
+    )
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS imdb_info( "
@@ -98,7 +98,7 @@ def main():
                 genre_row = cur.execute('SELECT genre_id FROM imdb_genres WHERE genre = ?', (genre,)).fetchone()
                 if genre_row is None:
                     cur.execute(
-                        "INSERT INTO imdb_genres(genre, genre_count) "
+                        "INSERT INTO imdb_genres(genre) "
                         "VALUES(?)",
                         (genre,)
                     )

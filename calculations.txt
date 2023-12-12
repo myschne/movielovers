@@ -1,22 +1,30 @@
+Movie Title: Speed  Average Rating: 7.21
+
 Average Ratings for Movies in Each Genre: 
-Action Average Rating:  6.942791666666667
-Adventure Average Rating:  6.7681249999999995
-Animation Average Rating:  7.52825
-Comedy Average Rating:  6.897981389578163
-Crime Average Rating:  7.1
-Documentary Average Rating:  6.425
-Drama Average Rating:  6.043
+Action Average Rating:  6.583425925925926
+Adventure Average Rating:  6.083833333333333
+Animation Average Rating:  7.285500000000001
+Biography Average Rating:  7.378
+Comedy Average Rating:  6.852600061199511
+Crime Average Rating:  7.175
+Documentary Average Rating:  7.050875
+Drama Average Rating:  6.407482954545454
 Family Average Rating:  6.4
+Horror Average Rating:  5.371
+Western Average Rating:  8.4
 
 Number of Movies in Each Genre: 
-Number of Movies in 'Action': 12
-Number of Movies in 'Comedy': 31
-Number of Movies in 'Drama': 5
-Number of Movies in 'Crime': 1
-Number of Movies in 'Animation': 3
-Number of Movies in 'Adventure': 4
+Number of Movies in 'Action': 27
+Number of Movies in 'Comedy': 43
+Number of Movies in 'Drama': 11
+Number of Movies in 'Crime': 2
+Number of Movies in 'Animation': 5
+Number of Movies in 'Adventure': 6
 Number of Movies in 'Family': 1
-Number of Movies in 'Documentary': 2
+Number of Movies in 'Documentary': 5
+Number of Movies in 'Biography': 1
+Number of Movies in 'Western': 1
+Number of Movies in 'Horror': 2
 
 Average of TMBd and IMBd Ratings for the Top 10 Movies
 'Yes Minister': 8.7
@@ -24,8 +32,8 @@ Average of TMBd and IMBd Ratings for the Top 10 Movies
 'Star Wars: Episode V - The Empire Strikes Back': 8.5455
 'Star Wars: Episode IV - A New Hope': 8.4025
 'Love, Death & Robots': 8.4
+'Have Gun - Will Travel': 8.4
 'Pretty Village, Pretty Flame': 8.3
 'Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb': 8.2645
+'Travel Man: 48 Hours in...': 8.2
 'Star Wars: Episode VI - Return of the Jedi': 8.097000000000001
-'The Nightmare Before Christmas': 7.8715
-'Star Trek': 7.667
