@@ -9,8 +9,7 @@ import sys
 def visualize_data(cur):
     movie_ratings = []
     for row in cur.execute("""
-        SELECT imdb_info.id, imdb_rating, tmdb_rating, imdb_info.title 
-                           
+        SELECT imdb_info.id, imdb_rating, tmdb_rating, imdb_info.title           
         FROM imdb_info 
         JOIN tmdb_info ON imdb_info.id = tmdb_info.id 
         """):
@@ -28,7 +27,9 @@ def visualize_data(cur):
     top_ratings = [rating for _, rating in movie_ratings[:10]]
 
     # Plotting the bar chart
+    plt.figure(figsize=(8, 10))
     plt.bar(top_movies, top_ratings, color='skyblue')
+    plt.ylim(0,10)
     plt.xlabel('Movies')
     plt.ylabel('Average Rating')
     plt.title('Top Rated Movies Based on Average IMDb and TMDb Ratings')
@@ -74,10 +75,28 @@ def visualize_data(cur):
     labels = genre_counts.keys()
     sizes = genre_counts.values()
 
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    # Calculate the percentage for each genre
+    total_movies = sum(sizes)
+    percentages = [percentage / total_movies * 100 for percentage in sizes]
+
+    # Create a list of tuples (genre, percentage) and sort it by percentage in descending order
+    sorted_legend_data = sorted(zip(labels, percentages), key=lambda x: x[1], reverse=True)
+
+    # Extract sorted labels and percentages from the sorted list
+    sorted_labels, sorted_percentages = zip(*sorted_legend_data)
+
+    # Plotting the pie chart
+    plt.figure(figsize=(15, 8))
+    plt.pie(sizes, labels=None, startangle=140)
     plt.axis('equal')  # Equal aspect ratio ensures that the pie is drawn as a circle.
     plt.title('Genre Distribution')
+
+    # Add a legend with sorted genre names and percentages
+    sorted_legend_labels = [f'{label} ({percentage:.1f}%)' for label, percentage in zip(sorted_labels, sorted_percentages)]
+    plt.legend(sorted_legend_labels, loc='best', bbox_to_anchor=(1, 0.5), fontsize='large')  # Adjust fontsize as needed
+
     plt.show()
+
 
 
 def main():
