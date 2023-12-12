@@ -14,7 +14,7 @@ def calc_avg_rating(cur, file):
         if genre in genre_list:
             break
         print("Genre Not Found")
-    movie_list = [g[0] for g in cur.execute('SELECT title FROM imdb_info JOIN imdb_genres ON imdb_info.id = imdb_genres.id WHERE genre = ?', (genre,)).fetchall()]
+    movie_list = [g[0] for g in cur.execute('SELECT title FROM imdb_info JOIN imdb_genres ON imdb_info.genre_id = imdb_genres.genre_id WHERE genre = ?', (genre,)).fetchall()]
     while True: 
         print("Movie List: ", end = "")
         print(movie_list)
@@ -36,7 +36,7 @@ def calc_avg_genre_rating(cur, file):
     for imdb_rating, tmdb_rating, genre in cur.execute("""
     SELECT avg(imdb_rating),avg(tmdb_rating),genre FROM imdb_info 
     JOIN tmdb_info ON imdb_info.id = tmdb_info.id, 
-    imdb_genres ON imdb_info.id = imdb_genres.id GROUP BY genre
+    imdb_genres ON imdb_info.genre_id = imdb_genres.genre_id GROUP BY genre
     """):
         if tmdb_rating is None:
             tmdb_rating = imdb_rating

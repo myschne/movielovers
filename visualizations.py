@@ -10,6 +10,7 @@ def visualize_data(cur):
     movie_ratings = []
     for row in cur.execute("""
         SELECT imdb_info.id, imdb_rating, tmdb_rating, imdb_info.title 
+                           
         FROM imdb_info 
         JOIN tmdb_info ON imdb_info.id = tmdb_info.id 
         """):
@@ -62,8 +63,9 @@ def visualize_data(cur):
     genre_counts = {}
 
     for row in cur.execute("""
-        SELECT genre 
-        FROM imdb_genres
+        SELECT genre FROM imdb_info 
+        JOIN imdb_genres ON 
+        imdb_info.genre_id = imdb_genres.genre_id
     """):
         genre = row[0]
         genre_counts[genre] = genre_counts.get(genre, 0) + 1

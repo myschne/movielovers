@@ -33,21 +33,12 @@ def search_imdb_data(search):
     return data
 
 # Function to fetch data from TMDb API
-def fetch_tmdb_data(title):
-    params = {'api_key': TMDB_API_KEY, 'query': title}
-    response = requests.get(TMDB_BASE_URL + title, params=params)
+def fetch_tmdb_data(id):
+    params = {'api_key': TMDB_API_KEY, 'query': id}
+    response = requests.get(TMDB_BASE_URL + id, params=params)
     data = response.json()
     print(data,"tmdb")
     return data
-
-# Function to calculate average rating
-def calculate_average_rating(imdb_rating, tmdb_rating):
-    return (imdb_rating + tmdb_rating) / 2
-
-
-
-   
-
 
 
 # Main function
@@ -56,25 +47,25 @@ def main():
     #Get Data from IMDB API
     con = sqlite3.connect('movie_data.db')
     cur = con.cursor()
+
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS imdb_genres("
+            "genre_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "genre VARCHAR[64] NOT NULL)"
+    )
+
     cur.execute(
         "CREATE TABLE IF NOT EXISTS imdb_info( "
             "id INTEGER PRIMARY KEY AUTOINCREMENT, "
             "title VARCHAR[64] NOT NULL, "
             "year INTEGER NOT NULL, "
-            "imdb_rating REAL NOT NULL)"
-    )
-
-
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS imdb_genres("
-            "id INTEGER PRIMARY KEY NOT NULL, "
-            "genre VARCHAR[64] NOT NULL)"
+            "imdb_rating REAL NOT NULL,"
+            "genre_id INTEGER NOT NULL)"
     )
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS tmdb_info("
             "id INTEGER PRIMARY KEY NOT NULL, "
-            "title VARCHAR[64] NOT NULL, "
             "tmdb_rating REAL)"
     )
     con.commit()
@@ -102,39 +93,39 @@ def main():
                     continue
                 if cur.execute('SELECT id FROM imdb_info WHERE title = ?',(title,)).fetchone() is not None:
                     continue
-                cur.execute(
-                    "INSERT INTO imdb_info(title, year, imdb_rating) "
-                    "VALUES(?, ?, ?)",
-                    (title, year, float(imdb_rating))
-                )
-                cur.execute(
-                    "SELECT last_insert_rowid()"
-                )
 
-                id = cur.fetchone()
+                #Check for Genres
+                genre_row = cur.execute('SELECT genre_id FROM imdb_genres WHERE genre = ?', (genre,)).fetchone()
+                if genre_row is None:
+                    cur.execute(
+                        "INSERT INTO imdb_genres(genre) "
+                        "VALUES(?)",
+                        (genre,)
+                    )
+                    con.commit()  # Commit changes to get the last inserted genre_id
+                    genre_id = cur.lastrowid
+                else:
+                    genre_id = genre_row[0]
 
                 cur.execute(
-                    "INSERT INTO imdb_genres(id, genre) "
-                    "VALUES(?,?)",
-                    (id[0],genre)
+                    "INSERT INTO imdb_info(title, year, imdb_rating, genre_id) "
+                    "VALUES(?, ?, ?, ?)",
+                    (title, year, float(imdb_rating), genre_id)
                 )
+                id = cur.lastrowid
                 print(movie)
 
                 #Fetch Data from TMDB
-                
                 imdb_id = movie["imdbID"]
-                # tmdb_data = fetch_tmdb_data(genre_list[genre][i])
                 tmdb_data = fetch_tmdb_data(imdb_id)
-
-
                 tmdb_rating = None
                 if("success" not in tmdb_data):
                     tmdb_rating = tmdb_data['vote_average']
 
                 cur.execute(
-                    "INSERT INTO tmdb_info(id, title, tmdb_rating) "
-                    "VALUES(?, ?, ?)",
-                    (id[0],title, tmdb_rating)
+                    "INSERT INTO tmdb_info(id, tmdb_rating) "
+                    "VALUES(?, ?)",
+                    (id, tmdb_rating)
                 )
                 
                 i += 1
