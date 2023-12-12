@@ -1,11 +1,13 @@
-Movie Title: Dragonzball PeePee  Average Rating: 9.1
+Movie Title: Pretty Woman  Average Rating: 7.2780000000000005
 
-Action Average Rating:  6.887569128787877
-Adventure Average Rating:  6.17825
-Animation Average Rating:  6.734569444444444
-Comedy Average Rating:  6.622111455108359
-Crime Average Rating:  6.1903
-Documentary Average Rating:  5.900716666666667
-Drama Average Rating:  6.824541666666667
-Horror Average Rating:  5.699999999999999
-Short Average Rating:  5.538095238095238
+Action Average Rating:  3.175
+Adventure Average Rating:  6.8
+Animation Average Rating:  6.575
+Comedy Average Rating:  5.4253888888888895
+Crime Average Rating:  7.1
+Documentary Average Rating:  4.757142857142856
+Drama Average Rating:  5.5930857142857135
+Horror Average Rating:  3.5
+Reality-TV Average Rating:  5.1
+Sci-Fi Average Rating:  7.7
+Short Average Rating:  5.610714285714286
