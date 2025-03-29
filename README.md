@@ -1,0 +1,1 @@
+Utilized TMDB and IMDB APIs to populate a SQLite database; performed analysis to identify average ratings and top ranked movies; generated bar plots, pie charts, and scatter plots to communicate findings regarding population  preferences
